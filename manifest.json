@@ -1,8 +1,8 @@
 {
-  "name": "MyChromeExtension",
+  "name": "my custom new tab",
   "version": "1.0",
   "chrome_url_overrides": {
-    "newtab": "index.html"
+    "newtab": "dist/index.html"
   },
-  "manifest_version": 2
+  "manifest_version": 3
 }
