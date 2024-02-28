@@ -9,11 +9,11 @@
     "build": "rspack build"
   },
   "dependencies": {
-    "vue": "3.4.8"
+    "vue": "3.4.20"
   },
   "devDependencies": {
-    "@rspack/cli": "0.5.0",
-    "@rspack/core": "0.5.0",
+    "@rspack/cli": "0.5.5",
+    "@rspack/core": "0.5.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3",
     "vue-loader": "^17.4.2"
