@@ -1,16 +1,15 @@
-import rspack from "@rspack/core";
+import rspack, { Configuration } from "@rspack/core";
 import {VueLoaderPlugin} from "vue-loader";
 
 const isDev = process.env.NODE_ENV == "development";
 
-/** @type {import('@rspack/cli').Configuration} */
-const config = {
+const config: Configuration = {
 	context: __dirname,
 	entry: {
 		main: "./src/main.ts"
 	},
 	plugins: [
-		new VueLoaderPlugin(),
+		new VueLoaderPlugin() as any,
 		new rspack.HtmlRspackPlugin({
 			template: "./index.html"
 		}),
