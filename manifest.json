@@ -1,6 +1,10 @@
 {
   "name": "my custom new tab",
   "version": "1.0",
+  "permissions": [
+    "topSites",
+    "favicon"
+  ],
   "chrome_url_overrides": {
     "newtab": "dist/index.html"
   },
