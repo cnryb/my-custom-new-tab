@@ -3,7 +3,8 @@
   "version": "1.0",
   "permissions": [
     "topSites",
-    "favicon"
+    "favicon",
+    "proxy"
   ],
   "chrome_url_overrides": {
     "newtab": "dist/index.html"
