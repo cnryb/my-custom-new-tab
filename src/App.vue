@@ -1,7 +1,9 @@
 <template>
 	<div class="root-container">
-		<!-- <img src="chrome-search://ntpicon/?size=48@1.000000x&amp;url=https://wiki.zhaopin.com/"> -->
-		<img :src="test" >
+		<div v-for="item in mostVisitedURLs " @click="onClickItem(item)">
+			<img :src="getFaviconUrl(item.url)" :alt="`${item.title} ${item.url}`">
+			{{ item.title }}
+		</div>
 	</div>
 </template>
 
@@ -10,20 +12,19 @@ import { onMounted,ref } from "vue";
 
 const mostVisitedURLs = ref<chrome.topSites.MostVisitedURL[]>([]);
 
-const test = ref('')
+function onClickItem(item: chrome.topSites.MostVisitedURL) {
+	window.location.href = item.url;
+}
+
 function getFaviconUrl(url: string) {
   let faviconUrl = new URL(`chrome-extension://${chrome.runtime.id}/_favicon/`);
   faviconUrl.searchParams.append('pageUrl', url);
-  faviconUrl.searchParams.append('size', '32');
+  faviconUrl.searchParams.append('size', '48');
   return faviconUrl.href;
 }
 
-test.value = getFaviconUrl('https://github.com/')
 onMounted(async () => {
-	console.log('App mounted');
 	mostVisitedURLs.value = await chrome.topSites.get();
-
-	console.log(mostVisitedURLs.value);
 });
 </script>
 
