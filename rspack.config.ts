@@ -5,6 +5,9 @@ const isDev = process.env.NODE_ENV == "development";
 
 const config: Configuration = {
 	context: __dirname,
+	resolve: {
+		extensions: [".ts", ".js", ".vue"],
+	},
 	entry: {
 		main: "./src/main.ts"
 	},

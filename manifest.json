@@ -4,7 +4,8 @@
   "permissions": [
     "topSites",
     "favicon",
-    "proxy"
+    "proxy",
+    "identity"
   ],
   "chrome_url_overrides": {
     "newtab": "dist/index.html"
