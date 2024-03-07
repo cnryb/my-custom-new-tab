@@ -1,4 +1,6 @@
 import { PublicClientApplication, LogLevel, AuthenticationResult } from '@azure/msal-browser'
+import { Client, AuthProvider, Options } from '@microsoft/microsoft-graph-client'
+
 const redirectUri = typeof chrome !== "undefined" && chrome.identity ?
   chrome.identity.getRedirectURL() :
   `${window.location.origin}/index.html`;
@@ -77,7 +79,23 @@ export async function getUserInfo() {
   const url = await getLoginUrl();
   const response = await launchWebAuthFlow(url);
   console.log(response);
+
   response?.accessToken && console.log("Access token: ", response.accessToken);
   response?.account && console.log("Account: ", response.account);
+  if(response){
+    const authProvider: AuthProvider = (done) => {
+      done(null, response.accessToken);
+    }
+    let options: Options = {
+      authProvider,
+    };
+    const client = Client.init(options);
+
+    let lists = await client.api('/me/todo/lists')
+    .get();
+    console.log('lists:');
+    console.log(lists);
+  }
 
 }
+
