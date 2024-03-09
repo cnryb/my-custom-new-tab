@@ -4,6 +4,7 @@ import { Client, AuthProvider, Options } from '@microsoft/microsoft-graph-client
 const redirectUri = typeof chrome !== "undefined" && chrome.identity ?
   chrome.identity.getRedirectURL() :
   `${window.location.origin}/index.html`;
+console.log(redirectUri)
 
 const msalInstance = new PublicClientApplication({
   auth: {
@@ -95,6 +96,23 @@ export async function getUserInfo() {
     .get();
     console.log('lists:');
     console.log(lists);
+
+    const listId = "AQMkADAwATM0MDAAMS05YTM5LTQzYTAtMDACLTAwCgAuAAADlSg4WnrcPkKp7MIsw_4IbQEAtIszuMABwU611qxgvvwrKQAAAgESAAAA"
+
+    let taskList = await client.api(`/me/todo/lists/${listId}/tasks`).get();
+
+  console.log(taskList)
+
+    let result = await client.api(`/me/todo/lists/${listId}/tasks`).post(
+      {
+        title: 'A new task from api',
+        body: {
+          "content": "<a href='http://cnryb.com'> cnryb </a>",
+          "contentType": "html"
+        }
+      }
+    );
+    console.log(result)
   }
 
 }
