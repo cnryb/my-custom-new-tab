@@ -83,7 +83,7 @@ export async function getUserInfo() {
 
   response?.accessToken && console.log("Access token: ", response.accessToken);
   response?.account && console.log("Account: ", response.account);
-  if(response){
+  if (response) {
     const authProvider: AuthProvider = (done) => {
       done(null, response.accessToken);
     }
@@ -92,27 +92,124 @@ export async function getUserInfo() {
     };
     const client = Client.init(options);
 
+    // 分类列表
     let lists = await client.api('/me/todo/lists')
-    .get();
+      .get();
     console.log('lists:');
     console.log(lists);
 
     const listId = "AQMkADAwATM0MDAAMS05YTM5LTQzYTAtMDACLTAwCgAuAAADlSg4WnrcPkKp7MIsw_4IbQEAtIszuMABwU611qxgvvwrKQAAAgESAAAA"
 
+    // task 列表
     let taskList = await client.api(`/me/todo/lists/${listId}/tasks`).get();
 
-  console.log(taskList)
+    console.log(taskList)
 
-    let result = await client.api(`/me/todo/lists/${listId}/tasks`).post(
-      {
-        title: 'A new task from api',
-        body: {
-          "content": "<a href='http://cnryb.com'> cnryb </a>",
-          "contentType": "html"
-        }
-      }
-    );
-    console.log(result)
+    // 新增
+    // let result = await client.api(`/me/todo/lists/${listId}/tasks`).post(
+    //   {
+    //     title: 'A new task from api',
+    //     body: {
+    //       "content": "<a href='http://cnryb.com'> cnryb </a>",
+    //       "contentType": "html"
+    //     }
+    //   }
+    // );
+    // console.log(result)
+
+    // // 详情
+    // const taskId = "AQMkADAwATM0MDAAMS05YTM5LTQzYTAtMDACLTAwCgBGAAADlSg4WnrcPkKp7MIsw_4IbQcAtIszuMABwU611qxgvvwrKQAAAgESAAAAtIszuMABwU611qxgvvwrKQAG-4XLVAAAAA=="
+    // let todoTask = await client.api(`/me/todo/lists/${listId}/tasks/${taskId}`)
+    //   .get();
+    // console.log(todoTask)
+
+
+
+    // list
+
+    // task
+
+    // check list
+  }
+
+}
+
+
+class TaskList {
+  private client: Client;
+
+  constructor(client: Client) {
+    this.client = client
+  }
+
+  async list() {
+
+  }
+
+  async create() {
+
+  }
+
+  async update() {
+
+  }
+
+  async delete() {
+
+  }
+
+}
+
+class Task {
+  private client: Client;
+
+  constructor(client: Client) {
+    this.client = client
+  }
+
+  async list() {
+
+  }
+
+  async detail() {
+
+  }
+
+  async create() {
+
+  }
+
+  async update() {
+
+  }
+
+  async delete() {
+
+  }
+
+}
+
+class CheckList {
+  private client: Client;
+
+  constructor(client: Client) {
+    this.client = client
+  }
+
+  async list() {
+
+  }
+
+  async create() {
+
+  }
+
+  async update() {
+
+  }
+
+  async delete() {
+
   }
 
 }
