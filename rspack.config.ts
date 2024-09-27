@@ -1,9 +1,11 @@
-import rspack, { Configuration } from "@rspack/core";
-import {VueLoaderPlugin} from "vue-loader";
+import { defineConfig } from "@rspack/cli";
+import { type RspackPluginFunction, rspack } from "@rspack/core";
+import { VueLoaderPlugin } from "vue-loader";
 
-const isDev = process.env.NODE_ENV == "development";
+// Target browsers, see: https://github.com/browserslist/browserslist
+const targets = ["chrome >= 120", "edge >= 120"];
 
-const config: Configuration = {
+export default defineConfig({
 	context: __dirname,
 	resolve: {
 		extensions: [".ts", ".js", ".vue"],
@@ -12,12 +14,13 @@ const config: Configuration = {
 		main: "./src/main.ts"
 	},
 	plugins: [
-		new VueLoaderPlugin() as any,
+		new VueLoaderPlugin() as RspackPluginFunction,
 		new rspack.HtmlRspackPlugin({
 			template: "./index.html"
 		}),
 		new rspack.DefinePlugin({
-			"__VUE_PROD_DEVTOOLS__": isDev
+			__VUE_OPTIONS_API__: true,
+			__VUE_PROD_DEVTOOLS__: false
 		})
 	],
 	module: {
@@ -38,16 +41,10 @@ const config: Configuration = {
 							sourceMap: true,
 							jsc: {
 								parser: {
-									syntax: "typescript",
-									tsx: false
+									syntax: "typescript"
 								}
 							},
-							env: {
-								targets: [
-									"chrome >= 120",
-									"edge >= 120"
-								]
-							}
+							env: { targets }
 						}
 					}
 				]
@@ -57,6 +54,16 @@ const config: Configuration = {
 				type: "asset/resource"
 			}
 		]
+	},
+	optimization: {
+		minimizer: [
+			new rspack.SwcJsMinimizerRspackPlugin(),
+			new rspack.LightningCssMinimizerRspackPlugin({
+				minimizerOptions: { targets }
+			})
+		]
+	},
+	experiments: {
+		css: true
 	}
-};
-module.exports = config;
+});

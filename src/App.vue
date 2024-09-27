@@ -7,24 +7,24 @@
 			</div>
 		</div> -->
 
-		<button @click="onClickItem({ url: '', title: '' })">TEST</button>
+		<!-- <button @click="onClickItem({ url: '', title: '' })">TEST2</button> -->
 	</div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
-import { getUserInfo } from './utils'
+// import { getUserInfo } from './utils'
 
-const mostVisitedURLs = ref<chrome.topSites.MostVisitedURL[]>([]);
+// const mostVisitedURLs = ref<chrome.topSites.MostVisitedURL[]>([]);
 
-async function onClickItem(item: chrome.topSites.MostVisitedURL) {
-	// console.log("onClickItem: ", chrome.identity.getRedirectURL());
-	// 	return;
-	// window.location.href = item.url;
-	await getUserInfo();
+// async function onClickItem(item: chrome.topSites.MostVisitedURL) {
+// 	// console.log("onClickItem: ", chrome.identity.getRedirectURL());
+// 	// 	return;
+// 	// window.location.href = item.url;
+// 	await getUserInfo();
 
 
-}
+// }
 
 function getFaviconUrl(url: string) {
 	let faviconUrl = new URL(`chrome-extension://${chrome.runtime.id}/_favicon/`);
