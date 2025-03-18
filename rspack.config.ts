@@ -11,7 +11,8 @@ export default defineConfig({
 		extensions: [".ts", ".js", ".vue"],
 	},
 	entry: {
-		main: "./src/main.ts"
+		main: "./src/main.ts",
+		service_worker: "./src/service_worker.ts"
 	},
 	plugins: [
 		new VueLoaderPlugin() as RspackPluginFunction,
