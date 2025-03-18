@@ -15,11 +15,11 @@
   },
   "devDependencies": {
     "@microsoft/microsoft-graph-types": "^2.40.0",
-    "@rspack/cli": "1.1.8",
-    "@rspack/core": "1.1.8",
-    "@types/chrome": "^0.0.294",
+    "@rspack/cli": "1.2.8",
+    "@rspack/core": "1.2.8",
+    "@types/chrome": "^0.0.309",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.3",
+    "typescript": "^5.8.2",
     "vue-loader": "^17.4.2"
   },
   "keywords": [],
