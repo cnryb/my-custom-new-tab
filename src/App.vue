@@ -36,6 +36,14 @@ function getFaviconUrl(url: string) {
 onMounted(async () => {
 	// const urls = await chrome.topSites.get();
 	// mostVisitedURLs.value = urls.slice(0, 6);
+	
+	// 发送消息
+	chrome.runtime.sendMessage(
+		{ action: "greet", data: "Hello from Extension Page" },
+		(response) => {
+			console.log("Service Worker 回复:", response);
+		}
+	);
 });
 </script>
 
