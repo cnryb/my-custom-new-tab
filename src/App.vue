@@ -8,11 +8,29 @@
 		</div> -->
 
 		<!-- <button @click="onClickItem({ url: '', title: '' })">TEST2</button> -->
+		<div>
+			<div>
+				<span>Proxy Config</span>
+				<span>{{ proxyConfig }}</span>
+			</div>
+			
+		</div>
+		<div>
+			<div>
+				<span>Pass List</span>
+				<span>{{ passList }}</span>
+			</div>
+		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { Message, MessageAction } from "./type";
+
+const proxyConfig = ref<chrome.proxy.ProxyServer | undefined>(undefined);
+const passList = ref<string[] | undefined>(undefined);
+
 // import { getUserInfo } from './utils'
 
 // const mostVisitedURLs = ref<chrome.topSites.MostVisitedURL[]>([]);
@@ -39,8 +57,14 @@ onMounted(async () => {
 	
 	// 发送消息
 	chrome.runtime.sendMessage(
-		{ action: "greet", data: "Hello from Extension Page" },
-		(response) => {
+		{ action: MessageAction.GET_PROXY_CONFIG, data: null },
+		(response: chrome.types.ChromeSettingGetResult<chrome.proxy.ProxyConfig>) => {
+			const config: chrome.proxy.ProxyServer | undefined = response.value.rules?.singleProxy;
+			proxyConfig.value = config;
+
+			const list: string[] | undefined = response.value.rules?.bypassList;
+
+			passList.value = list;
 			console.log("Service Worker 回复:", response);
 		}
 	);

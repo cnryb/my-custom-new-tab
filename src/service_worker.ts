@@ -1,11 +1,13 @@
+import { Message, MessageAction } from "./type";
 
 (async () => {
     // Service Worker 中监听消息
-    chrome.runtime.onMessage.addListener((message: any, sender: any, sendResponse: any) => {
-        console.log("收到消息:", message);
-        if (message.action === "greet") {
-            console.log("收到消息:", message.data);
-            sendResponse({ reply: "Hi from Service Worker!" });
+    chrome.runtime.onMessage.addListener((message: Message, sender: any, sendResponse: any) => {
+        if (message.action === MessageAction.GET_PROXY_CONFIG) {
+            chrome.proxy.settings.get({}).then((config: chrome.types.ChromeSettingGetResult<chrome.proxy.ProxyConfig>) => {
+                // config.value.rules?.singleProxy?.host
+                sendResponse(config);
+            })
         }
         return true; // 保持异步通道开启（如需异步回复）
     });
@@ -26,8 +28,8 @@
         scope: "regular"
     })
 
-    const config = await chrome.proxy.settings.get({})
-    console.log(config)
+    // const config = await chrome.proxy.settings.get({})
+    // console.log(config)
 
 
 
