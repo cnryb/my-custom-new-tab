@@ -6,6 +6,7 @@ import { VueLoaderPlugin } from "vue-loader";
 const targets = ["chrome >= 120", "edge >= 120"];
 
 export default defineConfig({
+	devtool: "source-map",
 	context: __dirname,
 	resolve: {
 		extensions: [".ts", ".js", ".vue"],
@@ -39,7 +40,6 @@ export default defineConfig({
 					{
 						loader: "builtin:swc-loader",
 						options: {
-							sourceMap: true,
 							jsc: {
 								parser: {
 									syntax: "typescript"
