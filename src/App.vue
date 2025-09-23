@@ -17,10 +17,12 @@
         <span>{{ passList }}</span>
       </div>
     </div>
-    <div>
-      <div v-for="item in mostVisitedURLs" :key="item.url" class="item" @click="onClickItem(item)">
-        <img :src="faviconURL(item.url)" />
-        <a>{{ item.title }}</a>
+    <div class="most-visited-urls">
+      <div v-for="item in mostVisitedURLs" :key="item.url" class="item">
+        <a :href="item.url" target="_blank">
+          <img :src="faviconURL(item.url)" :alt="item.title" />
+          <span>{{ item.title }}</span>
+        </a>
       </div>
     </div>
   </div>
@@ -131,5 +133,32 @@ onMounted(async () => {
 .root-container .item img {
   width: 24px;
   height: 24px;
+}
+
+.most-visited-urls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.most-visited-urls .item a {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 68px;
+  color: unset;
+  text-decoration: none;
+}
+
+.most-visited-urls .item span {
+  text-decoration: none;
+  margin-top: 4px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 </style>
