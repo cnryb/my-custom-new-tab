@@ -9,7 +9,7 @@
 				<span>Proxy Config</span>
 				<span>{{ proxyConfig }}</span>
 			</div>
-			
+
 		</div>
 		<div>
 			<div>
@@ -18,7 +18,10 @@
 			</div>
 		</div>
 		<div>
-			<img :src="faviconURL('https://github.com/')" />
+			<div v-for="item in mostVisitedURLs" :key="item.url" class="item" @click="onClickItem(item)">
+				<img :src="faviconURL(item.url)" />
+				<a>{{ item.title }}</a>
+			</div>
 		</div>
 	</div>
 </template>
@@ -32,7 +35,7 @@ const passList = ref<string[] | undefined>(undefined);
 
 // import { getUserInfo } from './utils'
 
-// const mostVisitedURLs = ref<chrome.topSites.MostVisitedURL[]>([]);
+const mostVisitedURLs = ref<chrome.topSites.MostVisitedURL[]>([]);
 
 // async function onClickItem(item: chrome.topSites.MostVisitedURL) {
 // 	// console.log("onClickItem: ", chrome.identity.getRedirectURL());
@@ -101,10 +104,14 @@ function onSetProxyConfig() {
 	);
 }
 
-onMounted(async () => {
-	// const urls = await chrome.topSites.get();
-	// mostVisitedURLs.value = urls.slice(0, 6);
+function onClickItem(item: chrome.topSites.MostVisitedURL) {
+	window.open(item.url, "_blank");
+}
 
+onMounted(async () => {
+	const urls = await chrome.topSites.get();
+	mostVisitedURLs.value = urls.slice(0, 6);
+	console.log("mostVisitedURLs: ", mostVisitedURLs.value);
 	onGetProxyConfig();
 });
 </script>
