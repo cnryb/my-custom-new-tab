@@ -1,13 +1,5 @@
 <template>
 	<div class="root-container">
-		<!-- <div class="item" v-for="item in mostVisitedURLs " @click="onClickItem(item)" :href="item.url">
-			<img :src="getFaviconUrl(item.url)" :alt="`${item.title} ${item.url}`">
-			<div>
-				{{ item.title }}
-			</div>
-		</div> -->
-
-		<!-- <button @click="onClickItem({ url: '', title: '' })">TEST2</button> -->
 
 		<button @click="onGetProxyConfig">Get Proxy Config</button>
 		<button @click="onSetProxyConfig">Set Proxy Config</button>
@@ -24,6 +16,9 @@
 				<span>Pass List</span>
 				<span>{{ passList }}</span>
 			</div>
+		</div>
+		<div>
+			<img :src="faviconURL('https://github.com/')" />
 		</div>
 	</div>
 </template>
@@ -48,11 +43,11 @@ const passList = ref<string[] | undefined>(undefined);
 
 // }
 
-function getFaviconUrl(url: string) {
-	let faviconUrl = new URL(`chrome-extension://${chrome.runtime.id}/_favicon/`);
-	faviconUrl.searchParams.append('pageUrl', url);
-	faviconUrl.searchParams.append('size', '48');
-	return faviconUrl.href;
+function faviconURL(u: string, size: number = 32): string {
+	const url = new URL(chrome.runtime.getURL("/_favicon/"));
+	url.searchParams.set("pageUrl", u);
+	url.searchParams.set("size", `${size}`);
+	return url.toString();
 }
 
 function onClearProxyConfig() {
@@ -109,7 +104,7 @@ function onSetProxyConfig() {
 onMounted(async () => {
 	// const urls = await chrome.topSites.get();
 	// mostVisitedURLs.value = urls.slice(0, 6);
-	
+
 	onGetProxyConfig();
 });
 </script>
