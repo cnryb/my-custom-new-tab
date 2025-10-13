@@ -48,6 +48,7 @@ const mostVisitedURLs = ref<chrome.topSites.MostVisitedURL[]>([]);
 
 // }
 
+// https://developer.chrome.com/docs/extensions/how-to/ui/favicons
 function faviconURL(u: string, size: number = 32): string {
   const url = new URL(chrome.runtime.getURL("/_favicon/"));
   url.searchParams.set("pageUrl", u);
