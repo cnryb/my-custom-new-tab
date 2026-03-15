@@ -1,165 +1,202 @@
 <template>
-  <div class="root-container">
+  <div class="page">
+    <div class="content">
+      <SearchBar
+        :search-engine="settings.searchEngine"
+        @update:search-engine="onSearchEngineChange"
+      />
 
-    <button @click="onGetProxyConfig">Get Proxy Config</button>
-    <button @click="onSetProxyConfig">Set Proxy Config</button>
-    <button @click="onClearProxyConfig">Clear Proxy Config</button>
-    <div>
-      <div>
-        <span>Proxy Config</span>
-        <span>{{ proxyConfig }}</span>
+      <ShortcutList
+        :shortcuts="shortcuts"
+        @add="onAddShortcut"
+        @update="onUpdateShortcut"
+        @delete="onDeleteShortcut"
+        @reorder="onReorderShortcuts"
+      />
+
+      <TopSites
+        :sites="filteredTopSites"
+        :show="settings.showTopSites"
+        @toggle-show="onToggleTopSites"
+      />
+
+      <div v-if="!settings.showTopSites" class="restore-topsites">
+        <button class="link-btn" @click="onToggleTopSites">显示最常访问</button>
       </div>
 
-    </div>
-    <div>
-      <div>
-        <span>Pass List</span>
-        <span>{{ passList }}</span>
-      </div>
-    </div>
-    <div class="most-visited-urls">
-      <div v-for="item in mostVisitedURLs" :key="item.url" class="item">
-        <a :href="item.url" target="_blank">
-          <img :src="faviconURL(item.url)" :alt="item.title" />
-          <span>{{ item.title }}</span>
-        </a>
-      </div>
+      <ProxyPanel
+        :proxy-enabled="proxyEnabled"
+        :current-proxy="currentProxy"
+        :current-bypass="currentBypass"
+        :proxy-draft="settings.proxyDraft"
+        @apply="onApplyProxy"
+        @clear="onClearProxy"
+        @save-draft="onSaveProxyDraft"
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
-import { Message, MessageAction } from "./type";
+import { ref, computed, onMounted } from "vue";
+import type { Shortcut, NewTabSettings, ProxyDraft } from "./type";
+import { DEFAULT_SETTINGS } from "./type";
+import { loadSettings, saveSettings, loadShortcuts, saveShortcuts } from "./storage";
+import SearchBar from "./components/SearchBar.vue";
+import ShortcutList from "./components/ShortcutList.vue";
+import TopSites from "./components/TopSites.vue";
+import ProxyPanel from "./components/ProxyPanel.vue";
 
-const proxyConfig = ref<chrome.proxy.ProxyServer | undefined>(undefined);
-const passList = ref<string[] | undefined>(undefined);
+const settings = ref<NewTabSettings>({ ...DEFAULT_SETTINGS });
+const shortcuts = ref<Shortcut[]>([]);
+const topSites = ref<chrome.topSites.MostVisitedURL[]>([]);
+const proxyEnabled = ref(false);
+const currentProxy = ref<chrome.proxy.ProxyServer>();
+const currentBypass = ref<string[]>();
 
-// import { getUserInfo } from './utils'
-
-const mostVisitedURLs = ref<chrome.topSites.MostVisitedURL[]>([]);
-
-// async function onClickItem(item: chrome.topSites.MostVisitedURL) {
-// 	// console.log("onClickItem: ", chrome.identity.getRedirectURL());
-// 	// 	return;
-// 	// window.location.href = item.url;
-// 	await getUserInfo();
-
-
-// }
-
-// https://developer.chrome.com/docs/extensions/how-to/ui/favicons
-function faviconURL(u: string, size: number = 32): string {
-  const url = new URL(chrome.runtime.getURL("/_favicon/"));
-  url.searchParams.set("pageUrl", u);
-  url.searchParams.set("size", `${size}`);
-  return url.toString();
-}
-
-function onClearProxyConfig() {
-  chrome.runtime.sendMessage(
-    { action: MessageAction.CLEAR_PROXY_CONFIG, data: null },
-    (response: { success: boolean }) => {
-      console.log("Service Worker 回复:", response);
-      if (response.success) {
-        onGetProxyConfig();
+const filteredTopSites = computed(() => {
+  const shortcutHosts = new Set(
+    shortcuts.value.map((s) => {
+      try {
+        return new URL(s.url).hostname;
+      } catch {
+        return s.url;
       }
-    }
+    }),
   );
-}
-
-function onGetProxyConfig() {
-  chrome.runtime.sendMessage(
-    { action: MessageAction.GET_PROXY_CONFIG, data: null },
-    (response: chrome.types.ChromeSettingGetResult<chrome.proxy.ProxyConfig>) => {
-      const config: chrome.proxy.ProxyServer | undefined = response.value.rules?.singleProxy;
-      proxyConfig.value = config;
-
-      const list: string[] | undefined = response.value.rules?.bypassList;
-
-      passList.value = list;
-      console.log("Service Worker 回复:", response);
-    }
-  );
-}
-
-function onSetProxyConfig() {
-  const config: chrome.proxy.ProxyConfig = {
-    mode: "fixed_servers",
-    rules: {
-      singleProxy: {
-        scheme: "http",
-        host: "127.0.0.1",
-        port: 1082
-      },
-      bypassList: ["localhost", "127.0.0.1", "192.168.1.100", "cnryb.com"]
-    }
-  };
-
-  chrome.runtime.sendMessage(
-    { action: MessageAction.SET_PROXY_CONFIG, data: config },
-    (response: { success: boolean }) => {
-      console.log("Service Worker 回复:", response);
-      if (response.success) {
-        onGetProxyConfig();
+  return topSites.value
+    .filter((site) => {
+      if (!site.url) return false;
+      try {
+        return !shortcutHosts.has(new URL(site.url).hostname);
+      } catch {
+        return false;
       }
-    }
-  );
-}
-
-function onClickItem(item: chrome.topSites.MostVisitedURL) {
-  window.open(item.url, "_blank");
-}
-
-onMounted(async () => {
-  const urls = await chrome.topSites.get();
-  mostVisitedURLs.value = urls.slice(0, 6);
-  console.log("mostVisitedURLs: ", mostVisitedURLs.value);
-  onGetProxyConfig();
+    })
+    .slice(0, 8);
 });
+
+async function init() {
+  const [s, sc] = await Promise.all([loadSettings(), loadShortcuts()]);
+  settings.value = s;
+  shortcuts.value = sc;
+
+  try {
+    const urls = await chrome.topSites.get();
+    topSites.value = urls;
+  } catch {
+    /* topSites permission may not be available */
+  }
+
+  refreshProxyStatus();
+}
+
+async function refreshProxyStatus() {
+  try {
+    const result = await chrome.proxy.settings.get({});
+    const cfg = result.value;
+    const proxy = cfg.rules?.singleProxy;
+    proxyEnabled.value = cfg.mode === "fixed_servers" && !!proxy;
+    currentProxy.value = proxy;
+    currentBypass.value = cfg.rules?.bypassList;
+  } catch {
+    proxyEnabled.value = false;
+  }
+}
+
+async function onSearchEngineChange(engine: NewTabSettings["searchEngine"]) {
+  settings.value.searchEngine = engine;
+  await saveSettings({ searchEngine: engine });
+}
+
+async function onAddShortcut(data: Omit<Shortcut, "id" | "order">) {
+  const item: Shortcut = {
+    ...data,
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    order: shortcuts.value.length,
+  };
+  shortcuts.value.push(item);
+  await saveShortcuts(shortcuts.value);
+}
+
+async function onUpdateShortcut(item: Shortcut) {
+  const idx = shortcuts.value.findIndex((s) => s.id === item.id);
+  if (idx >= 0) {
+    shortcuts.value[idx] = item;
+    await saveShortcuts(shortcuts.value);
+  }
+}
+
+async function onDeleteShortcut(item: Shortcut) {
+  shortcuts.value = shortcuts.value.filter((s) => s.id !== item.id);
+  await saveShortcuts(shortcuts.value);
+}
+
+async function onReorderShortcuts(list: Shortcut[]) {
+  shortcuts.value = list;
+  await saveShortcuts(list);
+}
+
+async function onToggleTopSites() {
+  settings.value.showTopSites = !settings.value.showTopSites;
+  await saveSettings({ showTopSites: settings.value.showTopSites });
+}
+
+async function onApplyProxy(config: chrome.proxy.ProxyConfig) {
+  try {
+    await chrome.proxy.settings.set({ value: config, scope: "regular" });
+    await refreshProxyStatus();
+  } catch (e) {
+    console.error("Failed to set proxy:", e);
+  }
+}
+
+async function onClearProxy() {
+  try {
+    await chrome.proxy.settings.clear({});
+    await refreshProxyStatus();
+  } catch (e) {
+    console.error("Failed to clear proxy:", e);
+  }
+}
+
+async function onSaveProxyDraft(draft: ProxyDraft) {
+  settings.value.proxyDraft = draft;
+  await saveSettings({ proxyDraft: draft });
+}
+
+onMounted(init);
 </script>
 
 <style>
-.root-container {
-  background-color: #242424;
+.page {
+  min-height: 100vh;
   display: flex;
-  flex-direction: column;
-}
-
-.root-container .item {
-  padding: 10px;
-  cursor: pointer;
-}
-
-.root-container .item img {
-  width: 24px;
-  height: 24px;
-}
-
-.most-visited-urls {
-  display: flex;
-  flex-wrap: wrap;
   justify-content: center;
+  padding: 0 16px;
 }
 
-.most-visited-urls .item a {
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 68px;
-  color: unset;
-  text-decoration: none;
+.content {
+  width: 100%;
+  max-width: 720px;
+  padding: 24px 0 48px;
 }
 
-.most-visited-urls .item span {
-  text-decoration: none;
-  margin-top: 4px;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
+.restore-topsites {
+  margin-bottom: 28px;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.link-btn:hover {
+  color: var(--text-secondary);
 }
 </style>

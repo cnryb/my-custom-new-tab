@@ -16,8 +16,9 @@ import { Message, MessageAction } from "./type";
                 sendResponse({ success: true });
             });
         } else if (message.action === MessageAction.CLEAR_PROXY_CONFIG) {
-            chrome.proxy.settings.clear({});
-            sendResponse({ success: true });
+            chrome.proxy.settings.clear({}, () => {
+                sendResponse({ success: true });
+            });
         } else {
             sendResponse({ success: false, error: "Unknown action" });
         }

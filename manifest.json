@@ -5,6 +5,7 @@
     "topSites",
     "favicon",
     "proxy",
+    "storage",
     "identity",
     "nativeMessaging"
   ],
