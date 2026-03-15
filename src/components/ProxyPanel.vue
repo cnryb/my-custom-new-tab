@@ -45,7 +45,6 @@
           <input v-model="bypassInput" type="text" placeholder="localhost, 127.0.0.1" />
         </label>
         <div class="proxy-actions">
-          <button @click="onSaveDraft">保存草稿</button>
           <button class="primary" @click="onApply">启用代理</button>
           <button v-if="proxyEnabled" class="danger" @click="onClear">关闭代理</button>
         </div>
@@ -56,32 +55,38 @@
 
 <script setup lang="ts">
 import { ref, watch } from "vue";
-import type { ProxyDraft } from "../type";
 
 const props = defineProps<{
   proxyEnabled: boolean;
   currentProxy: chrome.proxy.ProxyServer | undefined;
   currentBypass: string[] | undefined;
-  proxyDraft: ProxyDraft;
 }>();
 
 const emit = defineEmits<{
   apply: [config: chrome.proxy.ProxyConfig];
   clear: [];
-  saveDraft: [draft: ProxyDraft];
 }>();
 
 const expanded = ref(false);
-const draft = ref<ProxyDraft>({ ...props.proxyDraft });
-const bypassInput = ref(props.proxyDraft.bypassList.join(", "));
+
+const draft = ref({ scheme: "http", host: "", port: undefined as number | undefined });
+const bypassInput = ref("");
+
+function syncFromProps() {
+  if (props.proxyEnabled && props.currentProxy) {
+    draft.value = {
+      scheme: props.currentProxy.scheme ?? "http",
+      host: props.currentProxy.host ?? "",
+      port: props.currentProxy.port ?? 0,
+    };
+    bypassInput.value = props.currentBypass?.join(", ") ?? "";
+  }
+}
 
 watch(
-  () => props.proxyDraft,
-  (val) => {
-    draft.value = { ...val };
-    bypassInput.value = val.bypassList.join(", ");
-  },
-  { deep: true },
+  () => [props.proxyEnabled, props.currentProxy, props.currentBypass] as const,
+  syncFromProps,
+  { immediate: true },
 );
 
 function parsedBypass(): string[] {
@@ -89,10 +94,6 @@ function parsedBypass(): string[] {
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
-}
-
-function onSaveDraft() {
-  emit("saveDraft", { ...draft.value, bypassList: parsedBypass() });
 }
 
 function onApply() {
@@ -109,7 +110,6 @@ function onApply() {
     },
   };
   emit("apply", config);
-  emit("saveDraft", { ...draft.value, bypassList: bypass });
 }
 
 function onClear() {

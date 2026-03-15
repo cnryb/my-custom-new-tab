@@ -13,16 +13,12 @@ export async function loadSettings(): Promise<NewTabSettings> {
   return {
     ...DEFAULT_SETTINGS,
     ...saved,
-    proxyDraft: { ...DEFAULT_SETTINGS.proxyDraft, ...saved.proxyDraft },
   };
 }
 
 export async function saveSettings(patch: Partial<NewTabSettings>): Promise<NewTabSettings> {
   const current = await loadSettings();
   const updated = { ...current, ...patch };
-  if (patch.proxyDraft) {
-    updated.proxyDraft = { ...current.proxyDraft, ...patch.proxyDraft };
-  }
   await chrome.storage.local.set({ [STORAGE_KEY_SETTINGS]: updated });
   return updated;
 }

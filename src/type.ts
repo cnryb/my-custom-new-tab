@@ -31,18 +31,10 @@ export interface Shortcut {
   order: number;
 }
 
-export interface ProxyDraft {
-  scheme: string;
-  host: string;
-  port: number;
-  bypassList: string[];
-}
-
 export interface NewTabSettings {
   searchEngine: SearchEngineId;
   showTopSites: boolean;
   theme: "light" | "dark" | "system";
-  proxyDraft: ProxyDraft;
 }
 
 export const STORAGE_KEY_SETTINGS = "newTabSettings";
@@ -52,10 +44,4 @@ export const DEFAULT_SETTINGS: NewTabSettings = {
   searchEngine: "google",
   showTopSites: true,
   theme: "system",
-  proxyDraft: {
-    scheme: "http",
-    host: "127.0.0.1",
-    port: 1080,
-    bypassList: ["localhost", "127.0.0.1"],
-  },
 };

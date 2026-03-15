@@ -28,10 +28,8 @@
         :proxy-enabled="proxyEnabled"
         :current-proxy="currentProxy"
         :current-bypass="currentBypass"
-        :proxy-draft="settings.proxyDraft"
         @apply="onApplyProxy"
         @clear="onClearProxy"
-        @save-draft="onSaveProxyDraft"
       />
     </div>
   </div>
@@ -39,7 +37,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-import type { Shortcut, NewTabSettings, ProxyDraft } from "./type";
+import type { Shortcut, NewTabSettings } from "./type";
 import { DEFAULT_SETTINGS } from "./type";
 import { loadSettings, saveSettings, loadShortcuts, saveShortcuts } from "./storage";
 import SearchBar from "./components/SearchBar.vue";
@@ -158,11 +156,6 @@ async function onClearProxy() {
   } catch (e) {
     console.error("Failed to clear proxy:", e);
   }
-}
-
-async function onSaveProxyDraft(draft: ProxyDraft) {
-  settings.value.proxyDraft = draft;
-  await saveSettings({ proxyDraft: draft });
 }
 
 onMounted(init);
